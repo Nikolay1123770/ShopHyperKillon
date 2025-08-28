@@ -28,7 +28,8 @@
     .status.confirmed { background:#60a5fa33; border:1px solid #60a5fa66; }
     .status.delivered { background:#10b98133; border:1px solid #10b98166; }
     table { width:100%; border-collapse:collapse; margin-top:10px; }
-    th,td { border-bottom:1px solid rgba(255,255,255,0.2); padding:8px; }
+    th,td { border-bottom:1px solid rgba(255,255,255,0.2); padding:8px; vertical-align:top; }
+    .files-list a { display:block; margin:4px 0; }
   </style>
 </head>
 <body>
@@ -57,7 +58,7 @@
         <h2>Оформление заказа</h2>
         <div id="chosenInfo"></div>
         <h3>Способ оплаты</h3>
-        <label><input type="radio" name="paymethod" value="Карта" checked> 💳 Карта (2202208307028754 получатель Данил Алексеевич)</label><br>
+        <label><input type="radio" name="paymethod" value="Карта" checked> 💳 Карта сбер (2202208307028754 - получатель Данил Алексеевич)</label><br>
         <label><input type="radio" name="paymethod" value="юмани"> 📱 юмани (5599002099492383)</label><br>
         <label><input type="radio" name="paymethod" value="USDT"> ₿ USDT (TRC20: TL9x...3Q9z)</label>
         <textarea id="customerNote" placeholder="Комментарий к оплате..."></textarea>
@@ -79,7 +80,7 @@
       <div class="card">
         <h2>Доступ выдан</h2>
         <div id="delivKey"></div>
-        <a id="delivFile" class="btn ok" download>Скачать файл</a>
+        <div id="delivFiles" class="files-list"></div>
       </div>
     </section>
 
@@ -88,7 +89,7 @@
       <div class="card">
         <h2>Админ-панель</h2>
         <table>
-          <thead><tr><th>ID</th><th>Товар</th><th>Цена</th><th>Оплата</th><th>Комментарий</th><th>Статус</th><th>Файл</th><th>Действия</th></tr></thead>
+          <thead><tr><th>ID</th><th>Товар</th><th>Цена</th><th>Оплата</th><th>Комментарий</th><th>Статус</th><th>Файлы</th><th>Действия</th></tr></thead>
           <tbody id="adminTable"></tbody>
         </table>
       </div>
@@ -121,9 +122,11 @@
     ];
 
     let orders=JSON.parse(localStorage.getItem('orders')||'[]');
-    let activeOrderId=null; let chosenProduct=null;
+    let activeOrderId=localStorage.getItem('activeOrderId')||null;
+    let chosenProduct=null;
 
     function saveOrders(){ localStorage.setItem('orders',JSON.stringify(orders)); }
+    function saveActiveOrder(){ if(activeOrderId) localStorage.setItem('activeOrderId',activeOrderId); }
 
     function renderCatalog(){
       const androidGrid=document.getElementById('androidGrid');
@@ -150,8 +153,8 @@
     function placeOrder(){
       const method=document.querySelector('input[name=paymethod]:checked').value;
       const note=document.getElementById('customerNote').value;
-      const order={id:Math.random().toString(36).slice(2,8),product:chosenProduct.name,price:chosenProduct.price,method:method,note:note,status:'pending',file:null};
-      orders.push(order); saveOrders(); activeOrderId=order.id; goto('waiting');
+      const order={id:Math.random().toString(36).slice(2,8),product:chosenProduct.name,price:chosenProduct.price,method:method,note:note,status:'pending',files:[]};
+      orders.push(order); saveOrders(); activeOrderId=order.id; saveActiveOrder(); goto('waiting');
     }
 
     function renderWaiting(){
@@ -163,13 +166,21 @@
 
     function renderDelivered(o){
       if(!o) return; document.getElementById('delivKey').innerText='KEY-'+o.id.toUpperCase();
-      if(o.file){
-        document.getElementById('delivFile').href=URL.createObjectURL(o.file);
-        document.getElementById('delivFile').download=o.file.name;
+      const filesDiv=document.getElementById('delivFiles'); filesDiv.innerHTML="";
+      if(o.files && o.files.length>0){
+        o.files.forEach(f=>{
+          const a=document.createElement('a');
+          a.textContent="📂 "+f.name;
+          a.href=URL.createObjectURL(new Blob([f.data],{type:f.type}));
+          a.download=f.name;
+          a.className="btn ok";
+          filesDiv.appendChild(a);
+        });
       } else {
         const blob=new Blob([`Ваш ключ: KEY-${o.id.toUpperCase()}`],{type:'text/plain'});
-        document.getElementById('delivFile').href=URL.createObjectURL(blob);
-        document.getElementById('delivFile').download="key.txt";
+        const a=document.createElement('a');
+        a.href=URL.createObjectURL(blob); a.download="key.txt"; a.textContent="Скачать ключ"; a.className="btn ok";
+        filesDiv.appendChild(a);
       }
     }
 
@@ -183,9 +194,8 @@
           <td>${o.note}</td>
           <td><span class="status ${o.status}">${o.status}</span></td>
           <td>
-            ${o.file ? 
-              `${o.file.name} <button class='btn warn' onclick="removeFile('${o.id}')">Удалить</button>` :
-              `<input type='file' onchange="attachFile(event,'${o.id}')">`}
+            ${(o.files&&o.files.length>0)?o.files.map((f,i)=>`${f.name} <button class='btn warn' onclick="removeFile('${o.id}',${i})">X</button>`).join('<br>'):""}
+            <input type='file' multiple onchange="attachFiles(event,'${o.id}')">
           </td>
           <td>
             ${o.status==='pending'?`<button class='btn ghost' onclick="confirmOrder('${o.id}')">Подтвердить</button>`:''}
@@ -194,21 +204,27 @@
         </tr>`).join('');
     }
 
-    function attachFile(e,id){
-      if(e.target.files.length>0){
-        const file=e.target.files[0];
-        orders=orders.map(o=>o.id===id?{...o,file:file}:o);
-        saveOrders();
-        renderAdmin();
-        alert('Файл прикреплен к заказу '+id);
-      }
+    function attachFiles(e,id){
+      const files=Array.from(e.target.files);
+      orders=orders.map(o=>{
+        if(o.id===id){
+          const arr=o.files||[];
+          files.forEach(f=>{
+            const reader=new FileReader();
+            reader.onload=function(){
+              o.files.push({name:f.name,type:f.type,data:new Uint8Array(this.result)});
+              saveOrders(); renderAdmin();
+            };
+            reader.readAsArrayBuffer(f);
+          });
+        }
+        return o;
+      });
     }
 
-    function removeFile(id){
-      orders=orders.map(o=>o.id===id?{...o,file:null}:o);
-      saveOrders();
-      renderAdmin();
-      alert('Файл удалён у заказа '+id);
+    function removeFile(id,index){
+      orders=orders.map(o=>o.id===id?{...o,files:o.files.filter((_,i)=>i!==index)}:o);
+      saveOrders(); renderAdmin();
     }
 
     function confirmOrder(id){ orders=orders.map(o=>o.id===id?{...o,status:'confirmed'}:o); saveOrders(); renderAdmin(); renderWaiting(); }
@@ -216,7 +232,20 @@
 
     function openAdminLogin(){ document.getElementById('adminModal').style.display='flex'; }
     function closeAdminLogin(){ document.getElementById('adminModal').style.display='none'; }
-    function performAdminLogin(){ if(document.getElementById('loginUser').value==='admin' && document.getElementById('loginPass').value==='demo123'){ closeAdminLogin(); goto('adminPanel'); } else { document.getElementById('loginMsg').innerText='Неверные данные'; } }
+    function performAdminLogin(){ if(document.getElementById('loginUser').value==='HyperKillon' && document.getElementById('loginPass').value==='Lop123lop'){ closeAdminLogin(); goto('adminPanel'); } else { document.getElementById('loginMsg').innerText='Неверные данные'; } }
+
+    // при загрузке страницы проверяем статус активного заказа
+    window.onload=function(){
+      if(activeOrderId){
+        const o=orders.find(x=>x.id===activeOrderId);
+        if(o){
+          if(o.status==='pending' || o.status==='confirmed') goto('waiting');
+          if(o.status==='delivered') goto('delivered');
+        }
+      } else {
+        goto('catalog');
+      }
+    };
 
     renderCatalog();
   </script>
