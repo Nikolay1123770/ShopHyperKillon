@@ -2,252 +2,468 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HYPER STORE — Полная версия</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HYPER STORE — Single File</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Orbitron', sans-serif; background:#0e0017; color:#fff; margin:0; }
-    header.topbar { background:rgba(0,0,0,0.7); padding:15px; position:sticky; top:0; display:flex; justify-content:space-between; align-items:center; }
-    .btn { cursor:pointer; padding:10px 18px; border-radius:20px; border:none; background:linear-gradient(90deg,#7a00ff,#ff00ff); color:#fff; margin:2px; }
-    .btn.ghost { background:transparent; border:1px solid #ff00ff; }
-    .btn.ok { background:linear-gradient(90deg,#059669,#10b981); }
-    .btn.warn { background:linear-gradient(90deg,#b45309,#f59e0b); }
-    .wrap { max-width:1100px; margin:0 auto; padding:20px; }
-    h2 { margin-top:0; }
-    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; }
-    .card { background:rgba(0,0,0,0.55); padding:16px; border-radius:16px; border:1px solid rgba(255,0,255,0.3); box-shadow:0 0 14px rgba(255,0,255,0.2); }
-    .price { font-size:18px; margin-top:8px; }
-    section { display:none; }
-    section.active { display:block; }
-    .category-title { font-size:20px; margin:20px 0 10px; color:#ffd6ff; text-shadow:0 0 8px #ff00ff; }
-    input,textarea { width:100%; padding:10px; margin:5px 0; border-radius:12px; border:1px solid rgba(255,255,255,.2); background:rgba(0,0,0,.4); color:#fff; }
-    .status { padding:6px 10px; border-radius:8px; display:inline-block; margin-top:8px; }
-    .status.pending { background:#f59e0b33; border:1px solid #f59e0b66; }
-    .status.confirmed { background:#60a5fa33; border:1px solid #60a5fa66; }
-    .status.delivered { background:#10b98133; border:1px solid #10b98166; }
-    table { width:100%; border-collapse:collapse; margin-top:10px; }
-    th,td { border-bottom:1px solid rgba(255,255,255,0.2); padding:8px; vertical-align:top; }
-    .files-list a { display:block; margin:4px 0; }
+    :root{
+      --bg:#0e0017;--fg:#fff;--glow:#ff00ff;--glow2:#7a00ff;
+      --ok1:#059669;--ok2:#10b981;--warn1:#b45309;--warn2:#f59e0b;--info1:#3b82f6;--muted:#ffffff33;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:'Orbitron',sans-serif;background:var(--bg);color:var(--fg)}
+    a{color:#ffd6ff}
+    .topbar{position:sticky;top:0;z-index:20;display:flex;gap:8px;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(0,0,0,.6);backdrop-filter:saturate(120%) blur(8px);border-bottom:1px solid #ffffff22}
+    .brand{letter-spacing:1px}
+    .btn{cursor:pointer; padding:10px 16px;border-radius:18px;border:1px solid transparent;background:linear-gradient(90deg,var(--glow2),var(--glow));color:#fff}
+    .btn.ghost{background:transparent;border-color:var(--glow)}
+    .btn.ok{background:linear-gradient(90deg,var(--ok1),var(--ok2))}
+    .btn.warn{background:linear-gradient(90deg,var(--warn1),var(--warn2))}
+    .btn.info{background:linear-gradient(90deg,var(--info1),#60a5fa)}
+    .wrap{max-width:1100px;margin:0 auto;padding:18px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+    .card{background:rgba(0,0,0,.55);padding:16px;border-radius:16px;border:1px solid rgba(255,0,255,.3);box-shadow:0 0 14px rgba(255,0,255,.18)}
+    .category-title{font-size:18px;margin:18px 0 8px;color:#ffd6ff;text-shadow:0 0 8px var(--glow)}
+    .price{opacity:.9;margin-top:6px}
+    .muted{color:#ffffffaa}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .input, textarea, select{width:100%;padding:10px;border-radius:12px;border:1px solid #ffffff33;background:rgba(0,0,0,.4);color:#fff}
+    .status{display:inline-block;padding:6px 10px;border-radius:10px;border:1px solid #ffffff33}
+    .status.pending{background:#f59e0b33;border-color:#f59e0b66}
+    .status.confirmed{background:#60a5fa33;border-color:#60a5fa66}
+    .status.delivered{background:#10b98133;border-color:#10b98166}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;border-bottom:1px solid #ffffff22;text-align:left}
+    .pill{padding:4px 10px;border:1px solid #ffffff22;border-radius:999px}
+    .stars{font-size:18px;letter-spacing:2px}
+    .hidden{display:none}
+    footer{opacity:.8;padding:40px 0}
+    /* Mobile tweaks */
+    @media (max-width:768px){.wrap{padding:12px}.grid{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}.topbar{flex-wrap:wrap;gap:6px}}
   </style>
 </head>
 <body>
   <header class="topbar">
     <div class="brand">HYPER <span style="color:#ffd6ff">STORE</span></div>
-    <div class="actions">
-      <button class="btn ghost" onclick="goto('catalog')">Каталог</button>
-      <button class="btn ghost" onclick="openAdminLogin()">Админ</button>
-    </div>
+    <nav class="row">
+      <button class="btn ghost" data-link="#/catalog">Каталог</button>
+      <button class="btn ghost" data-link="#/cart">Корзина</button>
+      <button class="btn ghost" data-link="#/orders">Мои заказы</button>
+      <button class="btn ghost" data-link="#/profile">Личный кабинет</button>
+      <button class="btn ghost" data-link="#/admin">Админ</button>
+    </nav>
   </header>
 
   <main class="wrap">
     <!-- CATALOG -->
-    <section id="catalog" class="active">
+    <section id="page-catalog" class="page">
       <h2>Каталог</h2>
+      <div class="row" style="margin:6px 0 14px">
+        <input id="search" class="input" placeholder="Поиск по каталогу..."/>
+      </div>
       <div class="category-title">Android</div>
       <div id="androidGrid" class="grid"></div>
       <div class="category-title">iOS</div>
       <div id="iosGrid" class="grid"></div>
     </section>
 
-    <!-- CHECKOUT -->
-    <section id="checkout">
-      <div class="card">
-        <button class="btn ghost" onclick="goto('catalog')">← Назад</button>
-        <h2>Оформление заказа</h2>
-        <div id="chosenInfo"></div>
-        <h3>Способ оплаты</h3>
-        <label><input type="radio" name="paymethod" value="Карта" checked> 💳 Карта сбер (2202208307028754 - получатель Данил Алексеевич)</label><br>
-        <label><input type="radio" name="paymethod" value="юмани"> 📱 юмани (5599002099492383)</label><br>
-        <label><input type="radio" name="paymethod" value="USDT"> ₿ USDT (TRC20: TL9x...3Q9z)</label>
-        <textarea id="customerNote" placeholder="Комментарий к оплате..."></textarea>
-        <button class="btn" onclick="placeOrder()">Я оплатил(а)</button>
+    <!-- PRODUCT (modal-like inline) -->
+    <section id="page-product" class="page hidden">
+      <button class="btn ghost" data-link="#/catalog">← Назад</button>
+      <div id="productView" class="card"></div>
+      <div class="card" style="margin-top:12px">
+        <h3>Отзывы</h3>
+        <div id="reviewsList"></div>
+        <div style="margin-top:12px">
+          <textarea id="revText" class="input" placeholder="Ваш отзыв..."></textarea>
+          <div class="row" style="margin-top:8px">
+            <label>Оценка:
+              <select id="revRate" class="input" style="max-width:140px">
+                <option value="5">5</option><option value="4">4</option><option value="3">3</option>
+                <option value="2">2</option><option value="1">1</option>
+              </select>
+            </label>
+            <button class="btn" id="btnAddReview">Отправить отзыв</button>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- WAITING -->
-    <section id="waiting">
+    <!-- CHECKOUT (after selecting from cart or buy) -->
+    <section id="page-checkout" class="page hidden">
+      <button class="btn ghost" data-link="#/catalog">← Назад</button>
+      <div class="card">
+        <h2>Оформление заказа</h2>
+        <div id="checkoutSummary" class="muted"></div>
+        <h3>Способ оплаты</h3>
+        <label><input type="radio" name="paymethod" value="Карта" checked> 💳 Карта (2202 **** **** 9012)</label><br>
+        <label><input type="radio" name="paymethod" value="Qiwi"> 📱 Qiwi (+7 900 *** ** **)</label><br>
+        <label><input type="radio" name="paymethod" value="USDT"> ₿ USDT (TRC20)</label>
+        <textarea id="customerNote" class="input" placeholder="Комментарий к оплате (время, сумма, последние 4 цифры)..."></textarea>
+        <div class="row"><button class="btn" id="btnPayDone">Я оплатил(а)</button></div>
+      </div>
+    </section>
+
+    <!-- WAITING / STATUS -->
+    <section id="page-wait" class="page hidden">
       <div class="card">
         <h2>Ожидание подтверждения</h2>
-        <div id="waitingInfo"></div>
-        <div id="waitingStatus" class="status pending">pending</div>
+        <div id="waitInfo"></div>
+        <div id="waitStatus" class="status pending">pending</div>
       </div>
     </section>
 
     <!-- DELIVERED -->
-    <section id="delivered">
+    <section id="page-delivery" class="page hidden">
       <div class="card">
         <h2>Доступ выдан</h2>
-        <div id="delivKey"></div>
-        <div id="delivFiles" class="files-list"></div>
+        <div id="deliverKey"></div>
+        <div id="deliverFiles" class="row" style="margin-top:10px;flex-wrap:wrap"></div>
+        <button class="btn info" data-link="#/orders">Перейти к заказам</button>
+      </div>
+    </section>
+
+    <!-- CART -->
+    <section id="page-cart" class="page hidden">
+      <h2>Корзина</h2>
+      <div id="cartList"></div>
+      <div class="row" style="margin-top:10px"><button class="btn" id="btnGoCheckout">Перейти к оформлению</button></div>
+    </section>
+
+    <!-- ORDERS -->
+    <section id="page-orders" class="page hidden">
+      <h2>Мои заказы</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>ID</th><th>Товар</th><th>Цена</th><th>Оплата</th><th>Статус</th><th>Действия</th></tr></thead>
+          <tbody id="ordersTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PROFILE -->
+    <section id="page-profile" class="page hidden">
+      <h2>Личный кабинет</h2>
+      <div class="card">
+        <div id="profileBox"></div>
       </div>
     </section>
 
     <!-- ADMIN -->
-    <section id="adminPanel">
+    <section id="page-admin" class="page hidden">
       <div class="card">
-        <h2>Админ-панель</h2>
-        <table>
-          <thead><tr><th>ID</th><th>Товар</th><th>Цена</th><th>Оплата</th><th>Комментарий</th><th>Статус</th><th>Файлы</th><th>Действия</th></tr></thead>
-          <tbody id="adminTable"></tbody>
-        </table>
+        <div class="row" style="justify-content:space-between;align-items:center">
+          <h2>Админ-панель</h2>
+          <div id="adminAuth"></div>
+        </div>
+      </div>
+      <div id="adminArea" class="hidden">
+        <div class="card">
+          <h3>Заказы</h3>
+          <table>
+            <thead><tr><th>ID</th><th>Товар</th><th>Цена</th><th>Оплата</th><th>Комментарий</th><th>Статус</th><th>Действия</th></tr></thead>
+            <tbody id="adminOrders"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h3>Выдать файлы (до 20 шт на заказ)</h3>
+          <div class="row">
+            <input id="fileOrderId" class="input" placeholder="ID заказа" style="max-width:220px">
+            <input id="fileInput" type="file" multiple class="input"/>
+            <button class="btn ok" id="btnAttachFiles">Загрузить к заказу</button>
+          </div>
+        </div>
       </div>
     </section>
   </main>
 
-  <!-- ADMIN LOGIN MODAL -->
-  <div id="adminModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;">
-    <div class="card" style="max-width:300px;">
-      <h3>Вход администратора</h3>
-      <input id="loginUser" placeholder="admin" />
-      <input id="loginPass" type="password" placeholder="demo123" />
-      <button class="btn" onclick="performAdminLogin()">Войти</button>
-      <button class="btn ghost" onclick="closeAdminLogin()">Отмена</button>
-      <div id="loginMsg"></div>
-    </div>
-  </div>
+  <footer class="wrap">
+    <div class="muted">© HYPER STORE. Все права защищены.</div>
+  </footer>
 
-  <script>
-    const PRODUCTS = [
-      { id: 'and1', os:'android', name: 'Подписка 1 день', price: 200 },
-      { id: 'and7', os:'android', name: 'Подписка 7 дней', price: 300 },
-      { id: 'and30', os:'android', name: 'Подписка 30 дней', price: 400 },
-      { id: 'and365', os:'android', name: 'Подписка 365 дней', price: 700 },
-      { id: 'andForever', os:'android', name: 'Подписка всегда', price: 800 },
-      { id: 'ios1', os:'ios', name: 'Подписка 1 день', price: 200 },
-      { id: 'ios7', os:'ios', name: 'Подписка неделя', price: 300 },
-      { id: 'ios30', os:'ios', name: 'Подписка месяц', price: 600 },
-      { id: 'ios365', os:'ios', name: 'Подписка год', price: 1000 },
-    ];
+<script>
+/*************************
+ * Minimal SPA Router
+ *************************/
+const pages = {
+  '#/catalog':'page-catalog', '#/cart':'page-cart', '#/checkout':'page-checkout',
+  '#/wait':'page-wait', '#/delivered':'page-delivery', '#/orders':'page-orders',
+  '#/profile':'page-profile', '#/admin':'page-admin', '#/product':'page-product'
+};
+function show(hash){
+  // default
+  if(!hash || !(hash in pages)) hash = '#/catalog';
+  document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+  document.getElementById(pages[hash]).classList.remove('hidden');
+  // per-page hooks
+  if(hash==="#/catalog") renderCatalog();
+  if(hash==="#/cart") renderCart();
+  if(hash==="#/orders") renderOrdersTable();
+  if(hash==="#/profile") renderProfile();
+  if(hash==="#/admin") renderAdmin();
+}
+window.addEventListener('hashchange',()=>{
+  const h = location.hash.split('?')[0];
+  // product deep-link: #/product:id
+  if(h.startsWith('#/product')){
+    const pid = h.split(':')[1];
+    openProduct(pid);
+  } else {
+    show(h);
+  }
+});
+document.querySelectorAll('[data-link]').forEach(b=>b.addEventListener('click', e=>{location.hash=e.currentTarget.dataset.link;}));
 
-    let orders=JSON.parse(localStorage.getItem('orders')||'[]');
-    let activeOrderId=localStorage.getItem('activeOrderId')||null;
-    let chosenProduct=null;
+/*************************
+ * Demo data & helpers
+ *************************/
+const PRODUCTS=[
+  {id:'and1', os:'android', name:'Подписка 1 день', price:200, desc:'Быстрый старт. Полный функционал на 24 часа.'},
+  {id:'and7', os:'android', name:'Подписка 7 дней', price:300, desc:'Неделя доступа по сниженной цене.'},
+  {id:'and30', os:'android', name:'Подписка 30 дней', price:400, desc:'Оптимально для активного использования.'},
+  {id:'and365', os:'android', name:'Подписка 365 дней', price:700, desc:'Лучшее соотношение цена/срок.'},
+  {id:'andForever', os:'android', name:'Подписка всегда', price:800, desc:'Единовременный платеж и доступ навсегда.'},
+  {id:'ios1', os:'ios', name:'Подписка 1 день', price:200, desc:'24 часа доступа для iOS.'},
+  {id:'ios7', os:'ios', name:'Подписка неделя', price:300, desc:'7 дней доступа.'},
+  {id:'ios30', os:'ios', name:'Подписка месяц', price:600, desc:'30 дней доступа для iOS.'},
+  {id:'ios365', os:'ios', name:'Подписка год', price:1000, desc:'12 месяцев доступа.'}
+];
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
 
-    function saveOrders(){ localStorage.setItem('orders',JSON.stringify(orders)); }
-    function saveActiveOrder(){ if(activeOrderId) localStorage.setItem('activeOrderId',activeOrderId); }
-
-    function renderCatalog(){
-      const androidGrid=document.getElementById('androidGrid');
-      const iosGrid=document.getElementById('iosGrid');
-      androidGrid.innerHTML=PRODUCTS.filter(p=>p.os==='android').map(p=>`<div class="card"><h3>${p.name}</h3><div class="price">${p.price}₽</div><button class="btn" onclick="chooseProduct('${p.id}')">Купить</button></div>`).join('');
-      iosGrid.innerHTML=PRODUCTS.filter(p=>p.os==='ios').map(p=>`<div class="card"><h3>${p.name}</h3><div class="price">${p.price}₽</div><button class="btn" onclick="chooseProduct('${p.id}')">Купить</button></div>`).join('');
-    }
-
-    function goto(id){
-      document.querySelectorAll('main section').forEach(s=>s.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      if(id==='catalog') renderCatalog();
-      if(id==='waiting') renderWaiting();
-      if(id==='adminPanel') renderAdmin();
-      if(id==='delivered'){ renderDelivered(orders.find(o=>o.id===activeOrderId)); }
-    }
-
-    function chooseProduct(id){
-      chosenProduct=PRODUCTS.find(p=>p.id===id);
-      document.getElementById('chosenInfo').innerText=`${chosenProduct.name} — ${chosenProduct.price}₽`;
-      goto('checkout');
-    }
-
-    function placeOrder(){
-      const method=document.querySelector('input[name=paymethod]:checked').value;
-      const note=document.getElementById('customerNote').value;
-      const order={id:Math.random().toString(36).slice(2,8),product:chosenProduct.name,price:chosenProduct.price,method:method,note:note,status:'pending',files:[]};
-      orders.push(order); saveOrders(); activeOrderId=order.id; saveActiveOrder(); goto('waiting');
-    }
-
-    function renderWaiting(){
-      const o=orders.find(x=>x.id===activeOrderId);
-      if(!o) return; document.getElementById('waitingInfo').innerText=`Заказ ${o.id}: ${o.product} — ${o.price}₽ (оплата: ${o.method})`;
-      document.getElementById('waitingStatus').className='status '+o.status;
-      document.getElementById('waitingStatus').innerText=o.status;
-    }
-
-    function renderDelivered(o){
-      if(!o) return; document.getElementById('delivKey').innerText='KEY-'+o.id.toUpperCase();
-      const filesDiv=document.getElementById('delivFiles'); filesDiv.innerHTML="";
-      if(o.files && o.files.length>0){
-        o.files.forEach(f=>{
-          const a=document.createElement('a');
-          a.textContent="📂 "+f.name;
-          a.href=URL.createObjectURL(new Blob([f.data],{type:f.type}));
-          a.download=f.name;
-          a.className="btn ok";
-          filesDiv.appendChild(a);
-        });
-      } else {
-        const blob=new Blob([`Ваш ключ: KEY-${o.id.toUpperCase()}`],{type:'text/plain'});
-        const a=document.createElement('a');
-        a.href=URL.createObjectURL(blob); a.download="key.txt"; a.textContent="Скачать ключ"; a.className="btn ok";
-        filesDiv.appendChild(a);
-      }
-    }
-
-    function renderAdmin(){
-      document.getElementById('adminTable').innerHTML=orders.map(o=>`
-        <tr>
-          <td>${o.id}</td>
-          <td>${o.product}</td>
-          <td>${o.price}₽</td>
-          <td>${o.method}</td>
-          <td>${o.note}</td>
-          <td><span class="status ${o.status}">${o.status}</span></td>
-          <td>
-            ${(o.files&&o.files.length>0)?o.files.map((f,i)=>`${f.name} <button class='btn warn' onclick="removeFile('${o.id}',${i})">X</button>`).join('<br>'):""}
-            <input type='file' multiple onchange="attachFiles(event,'${o.id}')">
-          </td>
-          <td>
-            ${o.status==='pending'?`<button class='btn ghost' onclick="confirmOrder('${o.id}')">Подтвердить</button>`:''}
-            <button class='btn ok' onclick="deliverOrder('${o.id}')">Выдать</button>
-          </td>
-        </tr>`).join('');
-    }
-
-    function attachFiles(e,id){
-      const files=Array.from(e.target.files);
-      orders=orders.map(o=>{
-        if(o.id===id){
-          const arr=o.files||[];
-          files.forEach(f=>{
-            const reader=new FileReader();
-            reader.onload=function(){
-              o.files.push({name:f.name,type:f.type,data:new Uint8Array(this.result)});
-              saveOrders(); renderAdmin();
-            };
-            reader.readAsArrayBuffer(f);
-          });
-        }
-        return o;
-      });
-    }
-
-    function removeFile(id,index){
-      orders=orders.map(o=>o.id===id?{...o,files:o.files.filter((_,i)=>i!==index)}:o);
-      saveOrders(); renderAdmin();
-    }
-
-    function confirmOrder(id){ orders=orders.map(o=>o.id===id?{...o,status:'confirmed'}:o); saveOrders(); renderAdmin(); renderWaiting(); }
-    function deliverOrder(id){ orders=orders.map(o=>o.id===id?{...o,status:'delivered'}:o); saveOrders(); renderAdmin(); if(activeOrderId===id) goto('delivered'); }
-
-    function openAdminLogin(){ document.getElementById('adminModal').style.display='flex'; }
-    function closeAdminLogin(){ document.getElementById('adminModal').style.display='none'; }
-    function performAdminLogin(){ if(document.getElementById('loginUser').value==='HyperKillon' && document.getElementById('loginPass').value==='Lop123lop'){ closeAdminLogin(); goto('adminPanel'); } else { document.getElementById('loginMsg').innerText='Неверные данные'; } }
-
-    // при загрузке страницы проверяем статус активного заказа
-    window.onload=function(){
-      if(activeOrderId){
-        const o=orders.find(x=>x.id===activeOrderId);
-        if(o){
-          if(o.status==='pending' || o.status==='confirmed') goto('waiting');
-          if(o.status==='delivered') goto('delivered');
-        }
-      } else {
-        goto('catalog');
-      }
+/*************************
+ * IndexedDB tiny layer
+ *************************/
+const DB={db:null};
+function dbOpen(){
+  return new Promise((res,rej)=>{
+    const req=indexedDB.open('hyperDB',3);
+    req.onupgradeneeded=e=>{
+      const db=e.target.result;
+      if(!db.objectStoreNames.contains('orders')) db.createObjectStore('orders',{keyPath:'id'});
+      if(!db.objectStoreNames.contains('files')) db.createObjectStore('files',{keyPath:'fid'});
+      if(!db.objectStoreNames.contains('reviews')) db.createObjectStore('reviews',{keyPath:'rid'});
+      if(!db.objectStoreNames.contains('meta')) db.createObjectStore('meta',{keyPath:'key'});
     };
+    req.onsuccess=()=>{DB.db=req.result;res()};
+    req.onerror=()=>rej(req.error);
+  });
+}
+function tx(store,mode='readonly'){return DB.db.transaction(store,mode).objectStore(store)}
+// ORDERS
+async function ordersGetAll(){return new Promise((res)=>{const r=tx('orders').getAll();r.onsuccess=()=>res(r.result||[])})}
+async function ordersPut(o){return new Promise((res)=>{const r=tx('orders','readwrite').put(o);r.onsuccess=()=>res(true)})}
+async function ordersGet(id){return new Promise((res)=>{const r=tx('orders').get(id);r.onsuccess=()=>res(r.result)})}
+// FILES
+async function filePut(fid, obj){return new Promise((res)=>{const r=tx('files','readwrite').put({fid,...obj});r.onsuccess=()=>res(true)})}
+async function fileGet(fid){return new Promise((res)=>{const r=tx('files').get(fid);r.onsuccess=()=>res(r.result)})}
+// REVIEWS
+async function reviewAdd(rec){return new Promise((res)=>{const r=tx('reviews','readwrite').put(rec);r.onsuccess=()=>res(true)})}
+async function reviewsByProduct(pid){return new Promise((res)=>{
+  const out=[];const cursorReq=tx('reviews').openCursor();
+  cursorReq.onsuccess=e=>{const c=e.target.result;if(c){if(c.value.pid===pid) out.push(c.value); c.continue()} else res(out)}
+})}
 
-    renderCatalog();
-  </script>
+/*************************
+ * Auth (very light demo)
+ *************************/
+function currentUser(){try{return JSON.parse(localStorage.getItem('user'))}catch{return null}}
+function requireUser(){const u=currentUser(); if(!u){alert('Войдите в аккаунт'); location.hash='#/profile';} return !!u}
+
+/*************************
+ * Catalog, Search, Cart
+ *************************/
+let CART = JSON.parse(localStorage.getItem('cart')||'[]');
+function saveCart(){localStorage.setItem('cart',JSON.stringify(CART))}
+function renderCatalog(){
+  const q = ($('#search')?.value||'').toLowerCase();
+  const listA=PRODUCTS.filter(p=>p.os==='android' && (!q || p.name.toLowerCase().includes(q)));
+  const listI=PRODUCTS.filter(p=>p.os==='ios' && (!q || p.name.toLowerCase().includes(q)));
+  $('#androidGrid').innerHTML=listA.map(cardHTML).join('');
+  $('#iosGrid').innerHTML=listI.map(cardHTML).join('');
+}
+function cardHTML(p){
+  return `<div class="card"><h3>${p.name}</h3><div class="price">${p.price}₽</div>
+    <div class="row"><button class="btn" onclick="addToCart('${p.id}')">В корзину</button>
+    <button class="btn ghost" onclick="location.hash='#/product:${p.id}'">Подробнее</button></div></div>`
+}
+function addToCart(id){
+  const p=PRODUCTS.find(x=>x.id===id);
+  if(!CART.find(x=>x.id===id)){CART.push({id:p.id,name:p.name,price:p.price}); saveCart(); alert('Добавлено в корзину');}
+  else alert('Уже в корзине');
+}
+$('#search')?.addEventListener('input',renderCatalog);
+
+function renderCart(){
+  const root=$('#cartList');
+  if(!CART.length){root.innerHTML='<div class="card">Корзина пуста</div>';return}
+  const sum = CART.reduce((a,b)=>a+b.price,0);
+  root.innerHTML = CART.map(i=>`<div class="card row" style="justify-content:space-between"><div><b>${i.name}</b><div class='muted'>${i.price}₽</div></div><button class="btn warn" onclick="removeCart('${i.id}')">Удалить</button></div>`).join('')+
+    `<div class="card row" style="justify-content:space-between"><div><b>Итого:</b></div><div>${sum}₽</div></div>`;
+}
+function removeCart(id){CART=CART.filter(i=>i.id!==id); saveCart(); renderCart()}
+$('#btnGoCheckout')?.addEventListener('click',()=>{ if(!CART.length) return alert('Корзина пуста'); startCheckoutFromCart(); });
+
+/*************************
+ * Product view + Reviews
+ *************************/
+let CURRENT_PRODUCT=null;
+async function openProduct(pid){
+  CURRENT_PRODUCT = PRODUCTS.find(p=>p.id===pid);
+  if(!CURRENT_PRODUCT){alert('Товар не найден'); location.hash='#/catalog'; return}
+  $('#productView').innerHTML = `<h2>${CURRENT_PRODUCT.name}</h2><div class='muted'>${CURRENT_PRODUCT.desc}</div>
+    <div class='price'>Цена: <b>${CURRENT_PRODUCT.price}₽</b></div>
+    <div class='row' style='margin-top:10px'><button class='btn' onclick="addToCart('${CURRENT_PRODUCT.id}')">В корзину</button>
+    <button class='btn ghost' onclick="buyNow('${CURRENT_PRODUCT.id}')">Купить сейчас</button></div>`;
+  location.hash = '#/product:'+pid; // ensure route
+  renderReviewsUI(pid);
+  show('#/product');
+}
+$('#btnAddReview')?.addEventListener('click', async ()=>{
+  const text=$('#revText').value.trim(); const rate=parseInt($('#revRate').value||'5');
+  if(!text) return alert('Напишите отзыв');
+  const rid=Math.random().toString(36).slice(2,10);
+  await reviewAdd({rid, pid:CURRENT_PRODUCT.id, text, rate, author:(currentUser()?.username||'Гость'), ts:Date.now()});
+  $('#revText').value=''; renderReviewsUI(CURRENT_PRODUCT.id); alert('Отзыв добавлен');
+});
+async function renderReviewsUI(pid){
+  const list = await reviewsByProduct(pid);
+  if(!list.length){$('#reviewsList').innerHTML='<div class="muted">Пока нет отзывов</div>'; return}
+  const avg = (list.reduce((a,b)=>a+b.rate,0)/list.length).toFixed(1);
+  $('#reviewsList').innerHTML = `<div class='row'><div class='pill'>Средняя оценка: ${avg} ★</div><div class='pill'>Отзывов: ${list.length}</div></div>` +
+    list.sort((a,b)=>b.ts-a.ts).map(r=>`<div class='card'><div class='row' style='justify-content:space-between'><b>${r.author}</b><span class='stars'>${'★'.repeat(r.rate)}${'☆'.repeat(5-r.rate)}</span></div><div class='muted' style='margin-top:6px'>${r.text}</div></div>`).join('');
+}
+function buyNow(id){
+  const p=PRODUCTS.find(x=>x.id===id); CART=[{id:p.id,name:p.name,price:p.price}]; saveCart(); startCheckoutFromCart();
+}
+
+/*************************
+ * Checkout & Orders (IndexedDB persisted)
+ *************************/
+let ACTIVE_ORDER_ID=null;
+function startCheckoutFromCart(){
+  const sum=CART.reduce((a,b)=>a+b.price,0);
+  $('#checkoutSummary').innerText = CART.map(i=>`${i.name} — ${i.price}₽`).join(' \n ') + `\nИтого: ${sum}₽`;
+  location.hash='#/checkout'; show('#/checkout');
+}
+$('#btnPayDone')?.addEventListener('click', async ()=>{
+  if(!CART.length) return alert('Корзина пуста');
+  const method= document.querySelector('input[name=paymethod]:checked').value;
+  const note = $('#customerNote').value.trim();
+  const id = Math.random().toString(36).slice(2,8);
+  const order={id, items:[...CART], price:CART.reduce((a,b)=>a+b.price,0), method, note, status:'pending', files:[], createdAt:Date.now()};
+  await ordersPut(order); CART=[]; saveCart(); ACTIVE_ORDER_ID=id; await renderWait(order.id);
+  location.hash='#/wait';
+});
+
+async function renderWait(id){
+  const o = await ordersGet(id||ACTIVE_ORDER_ID); if(!o) return;
+  $('#waitInfo').innerText = `Заказ ${o.id}: ${o.items.map(i=>i.name).join(', ')} — ${o.price}₽ (оплата: ${o.method})`;
+  $('#waitStatus').className = 'status ' + o.status; $('#waitStatus').innerText = o.status;
+}
+
+async function renderOrdersTable(){
+  const list = (await ordersGetAll()).sort((a,b)=>b.createdAt-a.createdAt);
+  const tbody = $('#ordersTable');
+  if(!list.length){tbody.innerHTML = `<tr><td colspan='6'>Заказов пока нет</td></tr>`; return}
+  tbody.innerHTML = list.map(o=>`<tr><td>${o.id}</td><td>${o.items.map(i=>i.name).join(', ')}</td><td>${o.price}₽</td><td>${o.method}</td><td><span class='status ${o.status}'>${o.status}</span></td><td>${o.status!=='delivered'?`<button class='btn ghost' onclick=\"goWait('${o.id}')\">Статус</button>`:`<button class='btn ok' onclick=\"openDelivery('${o.id}')\">Получить</button>`}</td></tr>`).join('');
+}
+window.goWait = async (id)=>{ACTIVE_ORDER_ID=id; await renderWait(id); location.hash='#/wait'}
+window.openDelivery = async (id)=>{const o=await ordersGet(id); await showDelivery(o)}
+
+async function showDelivery(order){
+  if(!order) return; $('#deliverKey').innerText = 'KEY-' + order.id.toUpperCase();
+  const box=$('#deliverFiles'); box.innerHTML='';
+  if(order.files?.length){
+    for(const fid of order.files){ const f = await fileGet(fid); if(!f) continue; const blob=new Blob([f.data],{type:f.type}); const a=document.createElement('a'); a.download=f.name; a.href=URL.createObjectURL(blob); a.className='btn ok'; a.textContent='📂 '+f.name; box.appendChild(a); }
+  } else {
+    const blob=new Blob([`Ваш ключ: KEY-${order.id.toUpperCase()}`],{type:'text/plain'});
+    const a=document.createElement('a'); a.download='key.txt'; a.href=URL.createObjectURL(blob); a.className='btn ok'; a.textContent='Скачать ключ'; box.appendChild(a);
+  }
+  location.hash='#/delivered'; show('#/delivered');
+}
+
+/*************************
+ * Profile (register/login demo)
+ *************************/
+function renderProfile(){
+  const u=currentUser();
+  if(u){
+    $('#profileBox').innerHTML = `<div class='row' style='justify-content:space-between'><div><b>${u.username}</b><div class='muted'>${u.email}</div></div><button class='btn warn' onclick='logout()'>Выйти</button></div>
+    <div class='row' style='margin-top:10px'><button class='btn' data-link='#/orders' onclick='location.hash="#/orders"'>Мои заказы</button></div>`;
+  } else {
+    $('#profileBox').innerHTML = `<div class='row' style='gap:6px;flex-direction:column;align-items:stretch'>
+      <input id='regName' class='input' placeholder='Имя пользователя'>
+      <input id='regEmail' class='input' placeholder='Email'>
+      <input id='regPass' type='password' class='input' placeholder='Пароль'>
+      <button class='btn' onclick='register()'>Зарегистрироваться</button>
+      <div class='muted'>Уже есть аккаунт? Введите Email и Пароль и нажмите «Войти».</div>
+      <button class='btn ghost' onclick='login()'>Войти</button>
+    </div>`;
+  }
+}
+function register(){
+  const username=$('#regName').value.trim(); const email=$('#regEmail').value.trim(); const password=$('#regPass').value;
+  if(!username||!email||!password) return alert('Заполните поля');
+  localStorage.setItem('user',JSON.stringify({username,email,password})); alert('Регистрация выполнена'); renderProfile();
+}
+function login(){
+  const email=$('#regEmail').value.trim(); const pass=$('#regPass').value; const u=currentUser();
+  if(u && u.email===email && u.password===pass){ alert('Вход выполнен'); renderProfile()} else alert('Неверные данные');
+}
+function logout(){ localStorage.removeItem('user'); renderProfile(); }
+
+/*************************
+ * Admin (login + manage orders + attach files)
+ *************************/
+const ADMIN={logged:false,user:'admin',pass:'demo123'};
+function renderAdmin(){
+  $('#adminAuth').innerHTML = ADMIN.logged ? `<span class='pill'>Вход: admin</span> <button class='btn warn' onclick='adminLogout()'>Выйти</button>` : `
+    <input id='admUser' class='input' placeholder='Логин' style='max-width:140px'>
+    <input id='admPass' type='password' class='input' placeholder='Пароль' style='max-width:160px'>
+    <button class='btn' onclick='adminLogin()'>Войти</button>`;
+  $('#adminArea').classList.toggle('hidden',!ADMIN.logged);
+  if(ADMIN.logged) fillAdminOrders();
+}
+function adminLogin(){ ADMIN.logged = ($('#admUser').value===ADMIN.user && $('#admPass').value===ADMIN.pass); if(!ADMIN.logged) alert('Неверно'); renderAdmin(); }
+function adminLogout(){ ADMIN.logged=false; renderAdmin(); }
+async function fillAdminOrders(){
+  const list= (await ordersGetAll()).sort((a,b)=>b.createdAt-a.createdAt);
+  $('#adminOrders').innerHTML = list.map(o=>`<tr><td>${o.id}</td><td>${o.items.map(i=>i.name).join(', ')}</td><td>${o.price}₽</td><td>${o.method}</td><td>${o.note||''}</td><td><span class='status ${o.status}'>${o.status}</span></td><td>
+    ${o.status==='pending'?`<button class='btn ghost' onclick=\"admConfirm('${o.id}')\">Подтвердить</button>`:''}
+    <button class='btn ok' onclick=\"admDeliver('${o.id}')\">Выдать</button></td></tr>`).join('');
+}
+async function admConfirm(id){ const o=await ordersGet(id); if(!o) return; o.status='confirmed'; await ordersPut(o); await fillAdminOrders(); if(ACTIVE_ORDER_ID===id) await renderWait(id) }
+async function admDeliver(id){ const o=await ordersGet(id); if(!o) return; o.status='delivered'; await ordersPut(o); await fillAdminOrders(); if(ACTIVE_ORDER_ID===id) await showDelivery(o) }
+
+// Attach files to order (persisted in IndexedDB as ArrayBuffer)
+$('#btnAttachFiles')?.addEventListener('click', async ()=>{
+  const id = $('#fileOrderId').value.trim(); if(!id) return alert('Укажите ID заказа');
+  const o = await ordersGet(id); if(!o) return alert('Заказ не найден');
+  const files = $('#fileInput').files; if(!files.length) return alert('Выберите файлы');
+  if(!o.files) o.files=[];
+  const limit=20; if(o.files.length + files.length > limit) return alert('Лимит 20 файлов на заказ');
+  for(const f of files){
+    const buf = await f.arrayBuffer(); const fid = id+'_'+Math.random().toString(36).slice(2,8);
+    await filePut(fid,{name:f.name,type:f.type,data:buf,orderId:id,ts:Date.now()});
+    o.files.push(fid);
+  }
+  await ordersPut(o); $('#fileInput').value=''; alert('Файлы прикреплены'); await fillAdminOrders();
+});
+
+/*************************
+ * Boot
+ *************************/
+(async function(){
+  await dbOpen();
+  // open route
+  const h = location.hash.split('?')[0];
+  if(h.startsWith('#/product:')){ openProduct(h.split(':')[1]); }
+  else show(h);
+})();
+</script>
 </body>
 </html>
