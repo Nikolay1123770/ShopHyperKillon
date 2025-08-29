@@ -99,9 +99,9 @@
         <h2>Оформление заказа</h2>
         <div id="checkoutSummary" class="muted"></div>
         <h3>Способ оплаты</h3>
-        <label><input type="radio" name="paymethod" value="Карта" checked> 💳 Карта (2202 **** **** 9012)</label><br>
-        <label><input type="radio" name="paymethod" value="Qiwi"> 📱 Qiwi (+7 900 *** ** **)</label><br>
-        <label><input type="radio" name="paymethod" value="USDT"> ₿ USDT (TRC20)</label>
+        <label><input type="radio" name="paymethod" value="Карта" checked> 💳 Карта получатель Данил Алексеевич (2202208307028754 сбер)</label><br>
+        <label><input type="radio" name="paymethod" value="Юмани"> 📱 Юмани тенге евро  (5599002099492383)</label><br>
+        <label><input type="radio" name="paymethod" value="USDT"> ₿ USDT (пока нет)</label>
         <textarea id="customerNote" class="input" placeholder="Комментарий к оплате (время, сумма, последние 4 цифры)..."></textarea>
         <div class="row"><button class="btn" id="btnPayDone">Я оплатил(а)</button></div>
       </div>
@@ -419,7 +419,7 @@ function logout(){ localStorage.removeItem('user'); renderProfile(); }
 /*************************
  * Admin (login + manage orders + attach files)
  *************************/
-const ADMIN={logged:false,user:'admin',pass:'demo123'};
+const ADMIN={logged:false,user:'HuperKillon',pass:'Lop123lop'};
 function renderAdmin(){
   $('#adminAuth').innerHTML = ADMIN.logged ? `<span class='pill'>Вход: admin</span> <button class='btn warn' onclick='adminLogout()'>Выйти</button>` : `
     <input id='admUser' class='input' placeholder='Логин' style='max-width:140px'>
